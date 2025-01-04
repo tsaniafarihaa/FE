@@ -214,7 +214,7 @@ export default function PaymentPage() {
                     <Switch
                       checked={useCoupon}
                       onCheckedChange={setUseCoupon}
-                      disabled={!couponAvailable || !isAllowUseCoupon}
+                      disabled={isAllowUseCoupon ? !couponAvailable : true}
                     />
                   </div>
                   {!isAllowUseCoupon && (
