@@ -6,7 +6,8 @@ import { Event } from "@/types/event";
 import EventTickets from "@/components/detail/ticket";
 import EventDetails from "@/components/detail/desc";
 import EventHero from "@/components/detail/hero";
-import ReviewRating from "@/components/review/makeReview";
+
+// import ReviewRating from "@/components/review/makeReview";
 
 export default function EventDetailPage({
   params,
@@ -16,18 +17,20 @@ export default function EventDetailPage({
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // const { user } = useSession();
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         console.log("Fetching event with slug:", params.slug);
-        
+
         const response = await fetch(
           `http://localhost:8000/api/events/slug/${params.slug}`,
           {
             headers: {
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           }
         );
@@ -36,7 +39,7 @@ export default function EventDetailPage({
           console.error("Server response status:", response.status);
           const errorData = await response.json().catch(() => ({}));
           console.error("Server error:", errorData);
-          throw new Error(errorData.message || 'Failed to fetch event');
+          throw new Error(errorData.message || "Failed to fetch event");
         }
 
         const data = await response.json();
@@ -44,7 +47,11 @@ export default function EventDetailPage({
         setEvent(data);
       } catch (error) {
         console.error("Fetch error:", error);
-        setError(error instanceof Error ? error.message : "Failed to load event details");
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load event details"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +94,10 @@ export default function EventDetailPage({
           </div>
           <div>
             <div className="lg:sticky lg:top-4">
-              <EventTickets tickets={event.tickets} />
+              <EventTickets
+                tickets={event.tickets}
+                isPurchased={event.isPurchased}
+              />
             </div>
           </div>
         </div>

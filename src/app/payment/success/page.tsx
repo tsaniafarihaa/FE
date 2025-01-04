@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // src/app/payment/success/page.tsx
 "use client";
 
@@ -25,6 +26,10 @@ interface OrderDetails {
   finalPrice: number;
 }
 
+// interface SendEmailSuccess {
+//   orderId: string;
+// }
+
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -32,37 +37,62 @@ export default function PaymentSuccessPage() {
   const [loading, setLoading] = useState(true);
 
   const orderId = searchParams.get("order_id")?.replace("ORDER-", "");
+  const paramOrderId = Number(searchParams.get("order_id")?.split("-")[1]);
+
+  const fetchOrderDetails = async () => {
+    if (!orderId) {
+      router.push("/");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch order details");
+
+      const data = await response.json();
+      setOrderDetails(data);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendOrderEmailSuccess = async () => {
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payment/success-email-order/${paramOrderId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          // body: JSON.stringify({
+          //   orderId: ,
+          // }),
+        }
+      );
+      // alert("Email sent successfully");
+    } catch (error) {
+      console.log("Error sending email:", error);
+    } finally {
+    }
+  };
 
   useEffect(() => {
-    const fetchOrderDetails = async () => {
-      if (!orderId) {
-        router.push("/");
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL_BE}/orders/${orderId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to fetch order details");
-
-        const data = await response.json();
-        setOrderDetails(data);
-      } catch (error) {
-        console.error("Error fetching order details:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrderDetails();
-  }, [orderId, router]);
+    if (orderId) {
+      fetchOrderDetails();
+      sendOrderEmailSuccess();
+    }
+  }, [orderId]);
 
   if (loading) {
     return (

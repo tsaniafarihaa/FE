@@ -39,7 +39,9 @@ interface Review {
 export default function ProfilePage() {
   const { isAuth, type, user } = useSession();
   const [tickets, setTickets] = useState<UserTicket[]>([]);
-  const [reviewedTickets, setReviewedTickets] = useState<{[key: number]: boolean}>({});
+  const [reviewedTickets, setReviewedTickets] = useState<{
+    [key: number]: boolean;
+  }>({});
   const [loadingTickets, setLoadingTickets] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,37 +49,39 @@ export default function ProfilePage() {
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<UserTicket | null>(null);
 
-  const background = "https://res.cloudinary.com/dxpeofir6/video/upload/v1734510609/Blue_Dark_Blue_Gradient_Color_and_Style_Video_Background_d9g5ts.mp4";
+  const background =
+    "https://res.cloudinary.com/dxpeofir6/video/upload/v1734510609/Blue_Dark_Blue_Gradient_Color_and_Style_Video_Background_d9g5ts.mp4";
   const base_url = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await fetch(
-          `${base_url}/orders/history/user`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        const response = await fetch(`${base_url}/orders/history/user`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         const data = await response.json();
         setTickets(data.orders);
 
         // Check for reviews for each ticket
-        const reviewStatuses: {[key: number]: boolean} = {};
-        await Promise.all(data.orders.map(async (ticket: UserTicket) => {
-          const reviewResponse = await fetch(
-            `${base_url}/reviews/event/${ticket.eventId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-          const reviews = await reviewResponse.json();
-          reviewStatuses[ticket.eventId] = reviews.some((review: Review) => review.userId === user?.id);
-        }));
+        const reviewStatuses: { [key: number]: boolean } = {};
+        await Promise.all(
+          data.orders.map(async (ticket: UserTicket) => {
+            const reviewResponse = await fetch(
+              `${base_url}/reviews/event/${ticket.eventId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+            const reviews = await reviewResponse.json();
+            reviewStatuses[ticket.eventId] = reviews.some(
+              (review: Review) => review.userId === user?.id
+            );
+          })
+        );
         setReviewedTickets(reviewStatuses);
       } catch (error) {
         console.error("Error fetching tickets:", error);
@@ -91,7 +95,9 @@ export default function ProfilePage() {
     }
   }, [isAuth, user, base_url]);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) {
       Swal.fire({
@@ -128,7 +134,7 @@ export default function ProfilePage() {
       } else {
         throw new Error(`Failed to upload. Status: ${response.status}`);
       }
-    } catch (error) {
+    } catch {
       Swal.fire({
         title: "Error!",
         text: "Failed to update your profile picture. Please try again later.",
@@ -166,7 +172,9 @@ export default function ProfilePage() {
     );
   }
 
-  const filteredTickets = tickets.filter(ticket => !reviewedTickets[ticket.eventId]);
+  const filteredTickets = tickets.filter(
+    (ticket) => !reviewedTickets[ticket.eventId]
+  );
 
   return (
     <>
@@ -181,30 +189,45 @@ export default function ProfilePage() {
       <div className="min-h-screen py-10 mt-5 flex flex-col lg:flex-row px-6 relative">
         {/* Left Section - Tickets */}
         <div className="flex flex-col w-full lg:w-1/2 bg-black/50 bg-opacity-90 p-5 rounded-xl shadow-lg mt-10">
-          <h2 className="text-2xl font-bold mb-6 text-gray-100">Your Tickets</h2>
+          <h2 className="text-2xl font-bold mb-6 text-gray-100">
+            Your Tickets
+          </h2>
           <div className="space-y-4">
             {loadingTickets ? (
               <div className="text-center text-white">Loading tickets...</div>
             ) : filteredTickets.length > 0 ? (
               filteredTickets.map((ticket) => (
-                <div key={ticket.id} className="p-4 bg-gray-700 rounded-lg shadow">
+                <div
+                  key={ticket.id}
+                  className="p-4 bg-gray-700 rounded-lg shadow"
+                >
                   <div className="flex flex-col md:flex-row items-center justify-between space-x-4">
                     <img
                       src={ticket.event.thumbnail || "/concert1.jpg"}
                       alt={`${ticket.event.title} Thumbnail`}
                       className="w-16 h-16 object-cover rounded-md cursor-pointer"
-                      onClick={() => openModal(ticket.event.thumbnail || "/concert1.jpg")}
+                      onClick={() =>
+                        openModal(ticket.event.thumbnail || "/concert1.jpg")
+                      }
                     />
                     <div className="flex-1">
-                      <p className="font-semibold text-white">{ticket.event.title}</p>
-                      <p className="text-gray-400 text-sm">Date: {formatDate(ticket.event.date)}</p>
-                      <p className="text-gray-400 text-sm">Venue: {ticket.event.venue}</p>
+                      <p className="font-semibold text-white">
+                        {ticket.event.title}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Date: {formatDate(ticket.event.date)}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        Venue: {ticket.event.venue}
+                      </p>
                       {ticket.details[0]?.tickets.map((t, index) => (
                         <p key={index} className="text-gray-400 text-sm">
                           {t.category}: {ticket.details[0].quantity}x
                         </p>
                       ))}
-                      <p className="text-gray-400 text-sm">Price: {formatPrice(ticket.finalPrice)}</p>
+                      <p className="text-gray-400 text-sm">
+                        Price: {formatPrice(ticket.finalPrice)}
+                      </p>
                     </div>
                     <div className="flex flex-col items-end">
                       <span
@@ -224,10 +247,10 @@ export default function ProfilePage() {
                           const isFinished = eventDate < new Date();
                           if (!isFinished) {
                             Swal.fire({
-                              title: 'Cannot Review Yet',
-                              text: 'You can only review events after they have concluded.',
-                              icon: 'warning',
-                              confirmButtonText: 'OK'
+                              title: "Cannot Review Yet",
+                              text: "You can only review events after they have concluded.",
+                              icon: "warning",
+                              confirmButtonText: "OK",
                             });
                             return;
                           }
@@ -257,7 +280,9 @@ export default function ProfilePage() {
               src={user?.avatar || "https://via.placeholder.com/150"}
               alt="User Avatar"
               className="w-24 h-24 rounded-full border-4 border-orange-500 shadow-md mb-4 cursor-pointer"
-              onClick={() => openModal(user?.avatar || "https://via.placeholder.com/150")}
+              onClick={() =>
+                openModal(user?.avatar || "https://via.placeholder.com/150")
+              }
             />
             <label className="text-white text-[10px] bg-slate-500 p-1 rounded-3xl hover:bg-yellow-500 hover:text-orange-600 cursor-pointer">
               {uploading ? "Uploading..." : "Change profile picture"}
@@ -272,7 +297,9 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold text-white mt-4">
               {user?.username || "Guest"}
             </h2>
-            <p className="text-sm text-gray-400">{user?.email || "No Email Available"}</p>
+            <p className="text-sm text-gray-400">
+              {user?.email || "No Email Available"}
+            </p>
           </div>
 
           {/* User Info */}
@@ -303,7 +330,9 @@ export default function ProfilePage() {
                 <div>
                   <p className="text-white font-semibold">Your Points:</p>
                   <p className="text-white text-lg font-bold">
-                    {user?.points !== undefined ? `${formatPrice(user.points)} pts` : "No points"}
+                    {user?.points !== undefined
+                      ? `${formatPrice(user.points)} pts`
+                      : "No points"}
                   </p>
                 </div>
               </div>
@@ -320,7 +349,9 @@ export default function ProfilePage() {
                     </p>
                   </div>
                 ) : (
-                  <p className="text-white font-semibold">You have no coupon yet.</p>
+                  <p className="text-white font-semibold">
+                    You have no coupon yet.
+                  </p>
                 )}
               </div>
               {user?.percentage && (
@@ -362,7 +393,7 @@ export default function ProfilePage() {
             setSelectedTicket(null);
           }}
           eventId={selectedTicket.eventId}
-          userId={user?.id || ''}
+          userId={user?.id || ""}
           isEventFinished={new Date(selectedTicket.event.date) < new Date()}
         />
       )}

@@ -40,6 +40,7 @@ export interface Event {
   date: Date;
   time: Date;
   tickets: Ticket[];
+  isPurchased?: boolean;
 }
 
 export interface Ticket {
@@ -77,24 +78,24 @@ export interface PaymentData {
   percentage?: number;
 }
 
-interface UserTicket {
-  id: number;
-  eventId: number;
-  event: {
-    title: string;
-    thumbnail: string;
-    date: string;
-    venue: string;
-  };
-  status: "PENDING" | "PAID" | "CANCELED";
-  details: {
-    tickets: {
-      category: string;
-      price: number;
-    }[];
-    quantity: number;
-  }[];
-  totalPrice: number;
-  finalPrice: number;
-  createdAt: string;
-}
+// interface UserTicket {
+//   id: number;
+//   eventId: number;
+//   event: {
+//     title: string;
+//     thumbnail: string;
+//     date: string;
+//     venue: string;
+//   };
+//   status: "PENDING" | "PAID" | "CANCELED";
+//   details: {
+//     tickets: {
+//       category: string;
+//       price: number;
+//     }[];
+//     quantity: number;
+//   }[];
+//   totalPrice: number;
+//   finalPrice: number;
+//   createdAt: string;
+// }
